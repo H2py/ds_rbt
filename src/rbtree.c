@@ -17,15 +17,51 @@ rbtree *new_rbtree(void) {
 
 //왼쪽 회전, tree랑 x 포인터를 인자로 받는다
 node_t *left_rotate(rbtree *t, node_t *x) {
-  node_t *y = (node_t *)calloc(1, sizeof(node_t));
-  y = x->right;
+  node_t *y = x -> right;
+  x->right = y->left;
+
+  if (y->left != t->nil) {
+    y->left->parent = x;
+  }
+
+  y->parent = x->parent;
+
+  if(x->parent == t->nil) {
+    t->root = y;
+  } else if (x == x->parent->left) {
+    x->parent->left = y;
+  } else {
+    x->parent->right = y;
+  }
+  y->left = x;
   x->parent = y;
-  if(x->parent == t->nil) {}
+
+  return y;
 }
 
 //오른쪽 회전
 node_t *right_rotate(rbtree *t, node_t *y) {
+  node_t* x = y->left;
+  y->left = x->right;
 
+  if(x->right != t->nil) {
+    x->right->parent = y;
+  }
+
+  x->parent = y->parent;
+
+  if(y->parent == t->nil) {
+    t->root = x;
+  }
+  else if(y == y->parent->left) {
+    y->parent->left = x;
+  } else {
+    y->parent->right = x;
+  }
+  x->right = y;
+  y->parent = x;
+
+  return x;
 }
 
 void delete_rbtree(rbtree *t) {
