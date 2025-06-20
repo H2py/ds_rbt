@@ -4,14 +4,36 @@
 
 rbtree *new_rbtree(void) {
   rbtree *p = (rbtree *)calloc(1, sizeof(rbtree));
-  // TODO: initialize struct if needed
+  if (p == NULL) return NULL;
+
+  p->nil = (node_t *)calloc(1, sizeof(node_t));
+  if (p->nil == NULL) return NULL;
+
+  p->nil->color = RBTREE_BLACK;
+  p->root = p->nil;
+
   return p;
+}
+
+//왼쪽 회전, tree랑 x 포인터를 인자로 받는다
+node_t *left_rotate(rbtree *t, node_t *x) {
+  node_t *y = (node_t *)calloc(1, sizeof(node_t));
+  y = x->right;
+  x->parent = y;
+  if(x->parent == t->nil) {}
+}
+
+//오른쪽 회전
+node_t *right_rotate(rbtree *t, node_t *y) {
+
 }
 
 void delete_rbtree(rbtree *t) {
   // TODO: reclaim the tree nodes's memory
   free(t);
 }
+
+
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
   // TODO: implement insert

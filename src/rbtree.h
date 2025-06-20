@@ -1,5 +1,6 @@
 #ifndef _RBTREE_H_
 #define _RBTREE_H_
+#define SENTINEL
 
 #include <stddef.h>
 
@@ -21,6 +22,8 @@ typedef struct {
 rbtree *new_rbtree(void);
 void delete_rbtree(rbtree *);
 
+node_t *left_rotate(rbtree *t, node_t *x);
+node_t *right_rotate(rbtree *t, node_t *y);
 node_t *rbtree_insert(rbtree *, const key_t);
 node_t *rbtree_find(const rbtree *, const key_t);
 node_t *rbtree_min(const rbtree *);
