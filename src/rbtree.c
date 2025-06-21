@@ -15,8 +15,26 @@ rbtree *new_rbtree(void) {
   return p;
 }
 
+node_t* grandparent(rbtree *t, node_t * n)
+{
+  if(n == t->nil || n->parent == t->nil || n->parent->parent == t->nil)
+    return t->nil;
+  return n->parent->parent;
+}
+
+node_t* uncle(rbtree *t, node_t *n)
+{
+  node_t *g = grandparent(t, n);
+  if (g == t->nil) return t->nil;
+  
+  if (n->parent == g->left)
+    return g->right;
+  else
+    return g->left;
+}
+
 //왼쪽 회전, tree랑 x 포인터를 인자로 받는다
-node_t *left_rotate(rbtree *t, node_t *x) {
+void left_rotate(rbtree *t, node_t *x) {
   node_t *y = x -> right;
   x->right = y->left;
 
@@ -35,12 +53,10 @@ node_t *left_rotate(rbtree *t, node_t *x) {
   }
   y->left = x;
   x->parent = y;
-
-  return y;
 }
 
 //오른쪽 회전
-node_t *right_rotate(rbtree *t, node_t *y) {
+void right_rotate(rbtree *t, node_t *y) {
   node_t* x = y->left;
   y->left = x->right;
 
@@ -60,8 +76,6 @@ node_t *right_rotate(rbtree *t, node_t *y) {
   }
   x->right = y;
   y->parent = x;
-
-  return x;
 }
 
 void delete_rbtree(rbtree *t) {
@@ -69,11 +83,34 @@ void delete_rbtree(rbtree *t) {
   free(t);
 }
 
-
-
 node_t *rbtree_insert(rbtree *t, const key_t key) {
-  // TODO: implement insert
-  return t->root;
+  node_t *z = (node_t *)malloc(sizeof(node_t));
+  z->key = key;
+  z->color = RBTREE_RED;
+  z->left = z->right = z->parent = t->nil;
+
+  node_t *x = t->root;
+  node_t *y = t->nil;
+
+  while(x != t->nil)
+  {
+    y = x;
+    if (z->key < x->key)
+      x = x->left;
+    else
+      x = x->right;
+  }
+
+  z->parent = y;
+  if (y== t->nil)
+    t->root = z;
+  else if (z->key < y->key) 
+    y->left = z;
+  else
+    y->right = z;
+  z->left = t->nil;
+  z->right = t->nil;
+  z->color = RBTREE_RED;
 }
 
 node_t *rbtree_find(const rbtree *t, const key_t key) {

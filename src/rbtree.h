@@ -7,7 +7,6 @@
 typedef enum { RBTREE_RED, RBTREE_BLACK } color_t;
 
 typedef int key_t;
-
 typedef struct node_t {
   color_t color;
   key_t key;
@@ -20,10 +19,12 @@ typedef struct {
 } rbtree;
 
 rbtree *new_rbtree(void);
+node_t* grandparent(rbtree *, node_t *);
+node_t* uncle(rbtree *, node_t *);
 void delete_rbtree(rbtree *);
 
-node_t *left_rotate(rbtree *t, node_t *x);
-node_t *right_rotate(rbtree *t, node_t *y);
+void left_rotate(rbtree *, node_t *);
+void right_rotate(rbtree *, node_t *);
 node_t *rbtree_insert(rbtree *, const key_t);
 node_t *rbtree_find(const rbtree *, const key_t);
 node_t *rbtree_min(const rbtree *);
