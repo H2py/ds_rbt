@@ -1,18 +1,18 @@
 #include "rbtree.h"
-
 #include <stdlib.h>
 
+// 새로운 노드 생성, 자식은 t->nil로 설정 완료
 rbtree *new_rbtree(void) {
-  rbtree *p = (rbtree *)calloc(1, sizeof(rbtree));
-  if (p == NULL) return NULL;
+  rbtree *t = (rbtree *)calloc(1, sizeof(rbtree));
+  if (t == NULL) return NULL;
 
-  p->nil = (node_t *)calloc(1, sizeof(node_t));
-  if (p->nil == NULL) return NULL;
+  t->nil = (node_t *)calloc(1, sizeof(node_t));
+  if (t->nil == NULL) return NULL;
 
-  p->nil->color = RBTREE_BLACK;
-  p->root = p->nil;
+  t->nil->color = RBTREE_BLACK;
+  t->root = t->nil;
 
-  return p;
+  return t;
 }
 
 node_t* grandparent(rbtree *t, node_t * n)
@@ -78,40 +78,61 @@ void right_rotate(rbtree *t, node_t *y) {
   y->parent = x;
 }
 
+void delete_recursive(rbtree *t, node_t *cur)
+{
+  if(cur == t->nil) return;
+  
+  delete_recursive(t, cur->left);
+  delete_recursive(t, cur->right);
+  free(cur);
+}
+
 void delete_rbtree(rbtree *t) {
-  // TODO: reclaim the tree nodes's memory
+  delete_recursive(t, t->root);
+  free(t->nil);
   free(t);
 }
 
-node_t *rbtree_insert(rbtree *t, const key_t key) {
-  node_t *z = (node_t *)malloc(sizeof(node_t));
-  z->key = key;
-  z->color = RBTREE_RED;
-  z->left = z->right = z->parent = t->nil;
+node_t *rbtree_insert_fixup(rbtree* t, node_t *z)
+{
 
-  node_t *x = t->root;
-  node_t *y = t->nil;
+}
+
+node_t *rbtree_insert(rbtree *t, const key_t key) {
+  node_t *insert_node = (node_t *)malloc(sizeof(node_t));
+  insert_node->key = key;
+
+  node_t* x = t->root;
+  node_t* y = t->nil;
 
   while(x != t->nil)
   {
     y = x;
-    if (z->key < x->key)
+    if(insert_node->key < x->key)
       x = x->left;
     else
       x = x->right;
   }
 
-  z->parent = y;
-  if (y== t->nil)
-    t->root = z;
-  else if (z->key < y->key) 
-    y->left = z;
-  else
-    y->right = z;
-  z->left = t->nil;
-  z->right = t->nil;
-  z->color = RBTREE_RED;
+  insert_node->parent = y;
+  if (y == t->nil)
+  {
+    t->root = insert_node; 
+  } else if (insert_node->key < y->key)
+  {
+    y->left = insert_node;
+  } else
+  {
+    y->right = insert_node;
+  }
+  
+  insert_node->left = insert_node->right = t->nil;
+  insert_node->color = RBTREE_RED;
+  rbtree_insert_fixup(t, insert_node);
+
+  return insert_node;
 }
+
 
 node_t *rbtree_find(const rbtree *t, const key_t key) {
   // TODO: implement find
