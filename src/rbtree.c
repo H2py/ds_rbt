@@ -95,7 +95,7 @@ void delete_rbtree(rbtree *t) {
 
 node_t *rbtree_insert_fixup(rbtree* t, node_t *z)
 {
-
+  // I will destory rbtree
 }
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
