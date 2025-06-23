@@ -7,13 +7,21 @@ rbtree *new_rbtree(void) {
   if (t == NULL) return NULL;
 
   t->nil = (node_t *)calloc(1, sizeof(node_t));
-  if (t->nil == NULL) return NULL;
+  if (t->nil == NULL) {
+    free(t);
+    return NULL;
+  }
 
   t->nil->color = RBTREE_BLACK;
+  t->nil->left = t->nil;
+  t->nil->right = t->nil;
+  t->nil->parent = t->nil;
+
   t->root = t->nil;
 
   return t;
 }
+
 
 node_t* grandparent(rbtree *t, node_t * n)
 {
@@ -95,11 +103,54 @@ void delete_rbtree(rbtree *t) {
 
 node_t *rbtree_insert_fixup(rbtree* t, node_t *z)
 {
-  // I will destory rbtree
+
+  while(z->parent->color == RBTREE_RED)
+  {
+    node_t *g = grandparent(t, z);
+    node_t *u = uncle(t, z);
+
+    if(z->parent == g->left) {
+      if(u->color == RBTREE_RED) {
+        z->parent->color = u->color = RBTREE_BLACK;
+        g->color = RBTREE_RED;
+        z = g;
+      }
+      else {
+        if(z == z->parent->right) {
+          z = z->parent;
+          left_rotate(t, z);
+          // left_rotate(t, z->parent);
+        }
+        z->parent->color = RBTREE_BLACK;
+        g->color = RBTREE_RED;
+        right_rotate(t, g);
+      }
+    }
+    else if (z->parent == g->right) {
+      if(u->color == RBTREE_RED) {
+        z->parent->color = u->color = RBTREE_BLACK;
+        g->color = RBTREE_RED;
+        z = g;        
+      }
+      else {
+        if(z == z->parent->left) {
+          z = z->parent;
+          right_rotate(t, z);
+          // right_rotate(t, z->parent);
+        }
+        z->parent->color = RBTREE_BLACK;
+        g->color = RBTREE_RED;
+        left_rotate(t, g);
+      }
+    }
+  }
+  t->root->color = RBTREE_BLACK;
+  return z;
 }
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
   node_t *insert_node = (node_t *)malloc(sizeof(node_t));
+  if(insert_node == NULL) return NULL;
   insert_node->key = key;
 
   node_t* x = t->root;

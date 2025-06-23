@@ -1,4 +1,4 @@
-.PHONY: help build test clean
+.PHONY: help build test clean $(BUILD_DIR)
 
 # 빌드 아웃풋 디렉토리 설정
 BUILD_DIR := out
