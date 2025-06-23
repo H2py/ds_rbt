@@ -22,22 +22,21 @@ rbtree *new_rbtree(void) {
   return t;
 }
 
-
-node_t* grandparent(rbtree *t, node_t * n)
+node_t *grandparent(rbtree *t, node_t *n)
 {
   if(n == t->nil || n->parent == t->nil || n->parent->parent == t->nil)
     return t->nil;
   return n->parent->parent;
 }
 
-node_t* uncle(rbtree *t, node_t *n)
+node_t *uncle(rbtree *t, node_t *n)
 {
   node_t *g = grandparent(t, n);
-  if (g == t->nil) return t->nil;
-  
+  if(g == t->nil) return t->nil;
+
   if (n->parent == g->left)
     return g->right;
-  else
+  else if (n->parent == g->right)
     return g->left;
 }
 
@@ -149,55 +148,80 @@ node_t *rbtree_insert_fixup(rbtree* t, node_t *z)
 }
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
-  node_t *insert_node = (node_t *)malloc(sizeof(node_t));
-  if(insert_node == NULL) return NULL;
+  node_t *insert_node = (node_t*)malloc(sizeof(node_t));
+  if (insert_node == NULL) return NULL;
+
   insert_node->key = key;
-
-  node_t* x = t->root;
-  node_t* y = t->nil;
-
-  while(x != t->nil)
-  {
-    y = x;
-    if(insert_node->key < x->key)
-      x = x->left;
-    else
-      x = x->right;
-  }
-
-  insert_node->parent = y;
-  if (y == t->nil)
-  {
-    t->root = insert_node; 
-  } else if (insert_node->key < y->key)
-  {
-    y->left = insert_node;
-  } else
-  {
-    y->right = insert_node;
-  }
-  
   insert_node->left = insert_node->right = t->nil;
   insert_node->color = RBTREE_RED;
-  rbtree_insert_fixup(t, insert_node);
 
+  node_t *cur = t->root;
+  node_t *prev = t->nil;
+
+  while(cur != t->nil)
+  {
+    prev = cur;
+    if (cur->key < insert_node->key) 
+      cur = cur->right; 
+    else
+      cur = cur->left;
+  }
+  insert_node->parent = prev;
+
+  if (prev == t->nil) 
+    t->root = insert_node;
+  else if (insert_node->key < prev->key)
+    prev->left = insert_node;
+  else
+    prev->right = insert_node;
+
+  rbtree_insert_fixup(t, insert_node);  
   return insert_node;
 }
 
 
 node_t *rbtree_find(const rbtree *t, const key_t key) {
-  // TODO: implement find
-  return t->root;
+  node_t *cur = t->root;
+  if (cur == t->nil) return NULL;
+
+  while(cur != t->nil)
+  {
+    if (cur->key == key)
+    {
+      return cur;
+    } else if (cur->key < key)
+    {
+      cur = cur->right;
+    } else
+    {
+      cur = cur->left;
+    }
+  }
+  return NULL;
 }
 
 node_t *rbtree_min(const rbtree *t) {
-  // TODO: implement find
-  return t->root;
+  node_t *cur = t->root;
+  if (cur == t->nil) return NULL;
+
+  while(cur->left != t->nil)
+  {
+    cur = cur->left;
+  }
+
+  return cur;
 }
 
 node_t *rbtree_max(const rbtree *t) {
-  // TODO: implement find
-  return t->root;
+  node_t *cur = t->root;
+  if (cur == t->nil) return NULL;
+
+  while(cur->right != t->nil)
+  {
+    cur = cur->right;
+  }
+
+  return cur;
 }
 
 int rbtree_erase(rbtree *t, node_t *p) {
