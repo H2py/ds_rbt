@@ -1,6 +1,6 @@
 #include "rbtree.h"
 #include <stdlib.h>
-
+#define Max(x, y) ((x) > (y) ? (x) : (y))
 // 새로운 노드 생성, 자식은 t->nil로 설정 완료
 rbtree *new_rbtree(void) {
   rbtree *t = (rbtree *)calloc(1, sizeof(rbtree));
