@@ -220,8 +220,64 @@ node_t *rbtree_max(const rbtree *t) {
   return cur;
 }
 
+int rbtree_erase_fixup(rbtree *t, node_t *p)
+{
+
+}
+
 int rbtree_erase(rbtree *t, node_t *p) {
-  // TODO: implement erase
+  if (p == t->nil) return -1;
+
+  node_t *delete_node = rbtree_find(t, p->key);
+  if(delete_node == t->nil) return -1;
+
+  // 자식이 없을 때
+  if(delete_node->left == t->nil && delete_node->right == t->nil)
+  {
+    if(delete_node == delete_node->parent->left)
+      delete_node->parent->left = t->nil;
+    else
+      delete_node->parent->right = t->nil;
+    // free(delete_node);
+  } 
+  // 자식이 하나 있을 때,
+  else if (delete_node->left == t->nil || delete_node->right == t->nil)
+  {
+    node_t *child = (delete_node->left != t->nil) ? delete_node->left : delete_node->right;
+
+    child->parent = delete_node->parent;
+
+    if (delete_node->parent->left == delete_node)
+      delete_node->parent->left = child;
+    else
+      delete_node->parent->right= child;
+
+    // free(delete_node);
+  }
+  // 자식 2개있을 때
+  else
+  {
+    node_t *cur = delete_node->right;
+
+    while(cur->left != t->nil)
+      cur = cur->left;
+    
+    delete_node->key = cur->key;
+    
+    node_t *child = cur->right;
+    node_t *parent = cur->parent;
+
+    if(child != t->nil)
+      child->parent = parent;
+    
+    if(cur == parent->left)
+      parent->left = child;
+    else
+      parent->right = child;
+      
+    // free(cur);
+  }
+  rbtree_erase_fixup(t, delete_node);
   return 0;
 }
 
