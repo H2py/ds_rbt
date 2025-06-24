@@ -1,6 +1,6 @@
 #include "rbtree.h"
 #include <stdlib.h>
-#define Max(x, y) ((x) > (y) ? (x) : (y))
+
 // 새로운 노드 생성, 자식은 t->nil로 설정 완료
 rbtree *new_rbtree(void) {
   rbtree *t = (rbtree *)calloc(1, sizeof(rbtree));
@@ -36,7 +36,7 @@ node_t *uncle(rbtree *t, node_t *n)
 
   if (n->parent == g->left)
     return g->right;
-  else if (n->parent == g->right)
+  else 
     return g->left;
 }
 
@@ -187,15 +187,11 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
   while(cur != t->nil)
   {
     if (cur->key == key)
-    {
       return cur;
-    } else if (cur->key < key)
-    {
+    else if (cur->key < key)
       cur = cur->right;
-    } else
-    {
+    else
       cur = cur->left;
-    }
   }
   return NULL;
 }
