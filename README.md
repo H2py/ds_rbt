@@ -98,3 +98,8 @@ Balanced search tree로 많이 쓰이는 Red-black tree (이하 RB tree)를 C �
 - make visualize    # -> 시각화 실행 파일 빌드
 - make rebuild-test # -> 테스트 전체 클린 + 빌드
 - make clean        # -> 전체 정리
+
+
+### 삭제
+- 삭제하려는 노드의 자녀가 없거나 하나라면 삭제되는 색 = 삭제되는 노드의 색
+- 삭제하려는 노드의 자녀가 둘이라면 삭제되는 색 = 삭제되는 노드의 successor의 색
