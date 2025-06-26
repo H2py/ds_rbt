@@ -222,16 +222,91 @@ node_t *rbtree_max(const rbtree *t) {
 
 int rbtree_erase_fixup(rbtree *t, node_t *d)
 {
+  while(d != t->root && d->color == RBTREE_BLACK)
+  {
+    if(d == d->parent->left)
+    {
+      node_t *bro = d->parent->right;
+      // Case 1
+      if(bro->color == RBTREE_RED)
+      {
+        left_rotate(t, d->parent);
+        color_t temp_color = d->parent->color;
+        d->parent->color = bro->color;
+        bro->color = temp_color;
+        bro = d->parent->right;
+      }
+      
+      // Case 2
+      if(bro->color == RBTREE_BLACK && bro->left->color == RBTREE_BLACK && bro->right->color == RBTREE_BLACK)
+      {
+        bro->color = RBTREE_RED;
+        d = d->parent;
+      } 
+      else
+      {
+        if(bro->color == RBTREE_BLACK && bro->left->color == RBTREE_RED)
+        {
+          bro->color = RBTREE_RED;
+          bro->left->color = RBTREE_BLACK;
+          right_rotate(t, bro);
+          bro = d->parent->right;
+        }
+        
+        bro->color = d->parent->color;
+        d->parent->color = RBTREE_BLACK;
+        bro->right->color = RBTREE_BLACK;
+        left_rotate(t, d->parent);
+        d = t->root;
+      }
+    }
+    else
+    {
+      node_t *bro = d->parent->left;
 
+      if(bro->color == RBTREE_RED)
+      {
+        right_rotate(t, d->parent);
+        color_t temp_color = d->parent->color;
+        d->parent->color = bro->color;
+        bro->color = temp_color;
+        bro = d->parent->left;
+      }
+      
+      // Case 2
+      if(bro->color == RBTREE_BLACK && bro->left->color == RBTREE_BLACK && bro->right->color == RBTREE_BLACK)
+      {
+        bro->color = RBTREE_RED;
+        d = d->parent;
+      } 
+      else
+      {
+        if(bro->color == RBTREE_BLACK && bro->left->color == RBTREE_RED)
+        {
+          bro->color = RBTREE_RED;
+          bro->left->color = RBTREE_BLACK;
+          left_rotate(t, bro);
+          bro = d->parent->left;
+        }
+        
+        bro->color = d->parent->color;
+        d->parent->color = RBTREE_BLACK;
+        bro->left->color = RBTREE_BLACK;
+        right_rotate(t, d->parent);
+        d = t->root;
+      }
+    }
+  }
+  d->color = RBTREE_BLACK;
+  return 0;
 }
 
-int rbtree_erase(rbtree *t, node_t *d) {
-  if (d == t->nil) return -1;
+int rbtree_erase(rbtree *t, node_t *p) {
+  if (p == t->nil) return -1;
+  node_t *d = rbtree_find(t, p->key);
 
   color_t deleted_color = d->color;
-
   node_t *delete_after_node = t->nil;
-  if(d == t->nil) return -1;
 
   // 자식이 없을 때
   if(d->left == t->nil && d->right == t->nil)
@@ -241,6 +316,7 @@ int rbtree_erase(rbtree *t, node_t *d) {
     else
       d->parent->right = t->nil;
     free(d);
+    t->root = t->nil;
   } 
   // 자식이 하나 있을 때,
   else if (d->left == t->nil || d->right == t->nil)
@@ -260,8 +336,10 @@ int rbtree_erase(rbtree *t, node_t *d) {
   // 자식 2개있을 때
   else
   {
-    node_t *cur = rbtree_min(d->right);
-    d->key = cur->key;
+    node_t *cur = d->right;
+
+    while(cur->left != t->nil)
+      cur = cur->left;
     
     node_t *child = cur->right;
     node_t *parent = cur->parent;
@@ -284,7 +362,16 @@ int rbtree_erase(rbtree *t, node_t *d) {
   return 0;
 }
 
+void inorder_traversal(const rbtree *t, key_t *arr, const size_t n, node_t *p, int *i) {
+  if(p == t->nil || *i >= n) return;
+
+  inorder_traversal(t, arr , n, p->left, i);
+  arr[(*i)++] = p->key;
+  inorder_traversal(t, arr , n, p->right, i);
+}
+
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
-  // TODO: implement to_array
+  int i = 0;
+  inorder_traversal(t, arr, n, t->root, &i);
   return 0;
 }
