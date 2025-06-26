@@ -230,22 +230,21 @@ int rbtree_erase_fixup(rbtree *t, node_t *d)
       // Case 1
       if(bro->color == RBTREE_RED)
       {
+        bro->color = RBTREE_BLACK;
+        d->parent->color = RBTREE_RED;
         left_rotate(t, d->parent);
-        color_t temp_color = d->parent->color;
-        d->parent->color = bro->color;
-        bro->color = temp_color;
         bro = d->parent->right;
       }
       
       // Case 2
-      if(bro->color == RBTREE_BLACK && bro->left->color == RBTREE_BLACK && bro->right->color == RBTREE_BLACK)
+      if(bro->left->color == RBTREE_BLACK && bro->right->color == RBTREE_BLACK)
       {
         bro->color = RBTREE_RED;
         d = d->parent;
       } 
       else
       {
-        if(bro->color == RBTREE_BLACK && bro->left->color == RBTREE_RED)
+        if(bro->left->color == RBTREE_RED)
         {
           bro->color = RBTREE_RED;
           bro->left->color = RBTREE_BLACK;
@@ -266,22 +265,21 @@ int rbtree_erase_fixup(rbtree *t, node_t *d)
 
       if(bro->color == RBTREE_RED)
       {
+        bro->color = RBTREE_BLACK;
+        d->parent->color = RBTREE_RED;
         right_rotate(t, d->parent);
-        color_t temp_color = d->parent->color;
-        d->parent->color = bro->color;
-        bro->color = temp_color;
         bro = d->parent->left;
       }
       
       // Case 2
-      if(bro->color == RBTREE_BLACK && bro->left->color == RBTREE_BLACK && bro->right->color == RBTREE_BLACK)
+      if(bro->left->color == RBTREE_BLACK && bro->right->color == RBTREE_BLACK)
       {
         bro->color = RBTREE_RED;
         d = d->parent;
       } 
       else
       {
-        if(bro->color == RBTREE_BLACK && bro->left->color == RBTREE_RED)
+        if(bro->left->color == RBTREE_RED)
         {
           bro->color = RBTREE_RED;
           bro->left->color = RBTREE_BLACK;
@@ -302,61 +300,119 @@ int rbtree_erase_fixup(rbtree *t, node_t *d)
 }
 
 int rbtree_erase(rbtree *t, node_t *p) {
+  // p == t->nil 이면, erase 불가능
   if (p == t->nil) return -1;
+
+  // 삭제할 노드 탐색
   node_t *d = rbtree_find(t, p->key);
+  if(d == NULL) return -1;
 
   color_t deleted_color = d->color;
+
+  // 자식이 2개일 때
+  if(d->left != t->nil && d->right != t->nil)
+  {
+    node_t * successor = d->right;
+
+    while(successor->left != t->nil)
+      successor = successor->left;
+
+    d->key = successor->key;
+    d = successor;
+    deleted_color = successor->color;
+  }
+
+  // 삭제 후 대체되는 노드
   node_t *delete_after_node = t->nil;
+  node_t *child = (d->left == t->nil) ? d->right : d->left;
 
   // 자식이 없을 때
   if(d->left == t->nil && d->right == t->nil)
   {
-    if(d == d->parent->left)
+    if(d->parent == t->root)
+      t->root = t->nil;
+    else if(d == d->parent->left)
       d->parent->left = t->nil;
     else
       d->parent->right = t->nil;
-    free(d);
-    t->root = t->nil;
-  } 
-  // 자식이 하나 있을 때,
+  }
+  // 자식이 1개일 때
   else if (d->left == t->nil || d->right == t->nil)
   {
-    node_t *child = (d->left != t->nil) ? d->left : d->right;
-
-    child->parent = d->parent;
-
-    if (d->parent->left == d)
+    if(d->parent == t->root)
+      t->root = t->nil;
+    else if(d == d->parent->left)
       d->parent->left = child;
     else
-      d->parent->right= child;
-
-    free(d);
+      d->parent->right = child;
+    
+    child->parent = d->parent;
     delete_after_node = child;
   }
-  // 자식 2개있을 때
-  else
-  {
-    node_t *cur = d->right;
+  
+  free(d);
 
-    while(cur->left != t->nil)
-      cur = cur->left;
-    
-    node_t *child = cur->right;
-    node_t *parent = cur->parent;
-    
-    deleted_color = cur->color;
-    delete_after_node = child;
+  
 
-    if(child != t->nil)
-      child->parent = parent;
+  // 자식이 없을 때
+  // if(d->left == t->nil && d->right == t->nil)
+  // {
+  //   if(d == d->parent->left)
+  //     d->parent->left = t->nil;
+  //   else
+  //     d->parent->right = t->nil;
+
+  //   free(d);
+  // } 
+  // // 자식이 하나 있을 때,
+  // else if (d->left == t->nil || d->right == t->nil)
+  // {
+  //   node_t *child = (d->left != t->nil) ? d->left : d->right;
+
+  //   child->parent = d->parent;
+
+  //   if(d == t->root) {
+  //     t->root = child;
+  //   }
+  //   else
+  //   { 
+  //     if (d->parent->left == d)
+  //       d->parent->left = child;
+  //     else
+  //       d->parent->right= child;
+  //   }
+
+  //   delete_after_node = child;
+  //   free(d);
+  // }
+  // // 자식 2개있을 때
+  // else
+  // {
+  //   node_t *cur = d->right;
+  //   while (cur->left != t->nil)
+  //     cur = cur->left;
+
+  //   deleted_color = cur->color;
+  //   d->key = cur->key;
+
+  //   node_t *child = cur->right;
+  //   node_t *parent = cur->parent;
+
+  //   if (cur == d->right) { 
+  //     if (d == d->parent->left)
+  //       d->parent->left = child;
+  //     else
+  //       d->parent->right = child;
+  //     }
+  //     child->parent = d->parent;
     
-    if(cur == parent->left)
-      parent->left = child;
-    else
-      parent->right = child;
-      
-    free(cur);
-  }
+  //   if (child != t->nil)
+  //     child->parent = parent;
+  //     parent->left = child;
+    
+  //   delete_after_node = child;
+  //   free(cur); 
+  // }
   if (deleted_color == RBTREE_BLACK)
     rbtree_erase_fixup(t, delete_after_node);
   return 0;

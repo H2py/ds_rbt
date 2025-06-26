@@ -18,13 +18,13 @@ OBJ_DIR ?= $(CURDIR)
 TARGET = $(BIN_DIR)/test-rbtree
 OBJS = $(OBJ_DIR)/test-rbtree.o $(OBJ_DIR)/rbtree.o
 
-# # VISUALIZE 등록
-# VISUALIZE = $(BIN_DIR)/visualize_rbtree
-# VISUAL_OBJS = $(OBJ_DIR)/visualize_rbtree.o $(SRC_OBJ_DIR)/rbtree.o
+# VISUALIZE 등록
+VISUALIZE = $(BIN_DIR)/visualize_rbtree
+VISUAL_OBJS = $(OBJ_DIR)/visualize_rbtree.o $(SRC_OBJ_DIR)/rbtree.o
 
 all: $(TARGET) $(VISUALIZE)
 
-# visualize: $(VISUALIZE)
+visualize: $(VISUALIZE)
 
 test: $(TARGET)
 	$(TARGET)
@@ -35,15 +35,15 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
-# # visualize 실행 파일 생성
-# $(VISUALIZE): $(VISUAL_OBJS)
-# 	@mkdir -p $(BIN_DIR)
-# 	$(CC) $(CFLAGS) -o $@ $^
+# visualize 실행 파일 생성
+$(VISUALIZE): $(VISUAL_OBJS)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ $^
 
-# # visualize 목적 파일 생성
-# $(OBJ_DIR)/visualize_rbtree.o: visualize-rbtree.c
-# 	@mkdir -p $(OBJ_DIR)
-# 	$(CC) $(CFLAGS) -c $< -o $@
+# visualize 목적 파일 생성
+$(OBJ_DIR)/visualize_rbtree.o: visualize-rbtree.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # 테스트용 목적 파일
 $(OBJ_DIR)/test-rbtree.o: test-rbtree.c
